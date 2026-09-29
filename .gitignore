@@ -1,0 +1,8 @@
+node_modules/
+
+# Secrets -- copy backend/config/config.env.example instead
+backend/config/config.env
+.env
+
+npm-debug.log*
+.DS_Store
