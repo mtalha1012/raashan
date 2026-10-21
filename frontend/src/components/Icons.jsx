@@ -1,4 +1,3 @@
-// Small stroke icons, sized by the surrounding font (1em)
 const Icon = ({ children, className = '', ...props }) => (
     <svg
         viewBox="0 0 24 24"

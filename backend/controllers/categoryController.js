@@ -3,7 +3,7 @@ const Product = require("../models/productModel")
 const ErrorHandler = require("../utils/errorHandler")
 const asyncError = require("../middleware/asyncError")
 
-// Fields an admin is allowed to set
+// Fields admin can set
 const pickCategoryFields = (body) => {
     const fields = {}
     for (const key of ["name", "icon", "description", "sortOrder"]) {
@@ -12,7 +12,7 @@ const pickCategoryFields = (body) => {
     return fields
 }
 
-// Get all categories with how many products each has
+// Get all categories with product count
 exports.getAllCategories = asyncError(async (req, res, next) => {
     const categories = await Category.find().sort({ sortOrder: 1, name: 1 }).lean()
 

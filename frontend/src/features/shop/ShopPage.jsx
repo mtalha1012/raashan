@@ -14,7 +14,6 @@ export default function ShopPage() {
     const user = useSelector((state) => state.auth.user);
     const openItems = useSelector((state) => state.household.items.filter((item) => !item.done).length);
 
-    // Filters live in the URL so they survive refresh and the back button
     const keyword = searchParams.get('keyword') || '';
     const category = searchParams.get('category') || '';
     const page = Number(searchParams.get('page')) || 1;

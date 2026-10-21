@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { apiThunk } from '@/lib/api';
 import { logout } from '@/features/auth/authSlice';
 
-// The household itself
+// Household
 export const fetchHousehold = apiThunk('household/fetch', () => ['/household']);
 export const createHousehold = apiThunk('household/create', (details) => ['/household', { method: 'POST', body: details }]);
 export const joinHousehold = apiThunk('household/join', (details) => ['/household/join', { method: 'POST', body: details }]);
@@ -13,7 +13,7 @@ export const removeMember = apiThunk('household/removeMember', (userId) => [`/ho
 export const leaveHousehold = apiThunk('household/leave', () => ['/household/leave', { method: 'POST' }]);
 export const deleteHousehold = apiThunk('household/delete', () => ['/household', { method: 'DELETE' }]);
 
-// The shared list
+// List
 export const fetchList = apiThunk('household/list', () => ['/household/list']);
 export const addListItem = apiThunk('household/addItem', (item) => ['/household/list', { method: 'POST', body: item }]);
 export const parseMessage = apiThunk('household/parse', (message) => ['/household/list/parse', { method: 'POST', body: { message } }]);
@@ -26,7 +26,6 @@ export const deleteListItem = apiThunk('household/deleteItem', (id) => [`/househ
 export const clearDoneItems = apiThunk('household/clearDone', () => ['/household/list/done', { method: 'DELETE' }]);
 export const moveListToCart = apiThunk('household/toCart', () => ['/household/list/to-cart', { method: 'POST' }]);
 
-// Open items first, newest first -- same order the API sends
 const sortItems = (items) =>
     items.sort((a, b) => Number(a.done) - Number(b.done) || new Date(b.createdAt) - new Date(a.createdAt));
 

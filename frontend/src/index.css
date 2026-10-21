@@ -6,7 +6,6 @@
 @import "@fontsource/ibm-plex-mono/400.css";
 @import "@fontsource/ibm-plex-mono/500.css";
 
-/* Raashan is a grocery parchi: ballpoint ink on paper, a ledger margin, haldi for prices */
 @theme {
     --color-page: #EDEFE8;
     --color-paper: #FFFEF8;
@@ -15,7 +14,6 @@
     --color-ink-soft: #DDE1F6;
     --color-haldi: #E2A817;
     --color-haldi-soft: #FBEFC9;
-    /* Haldi dark enough to read as text on white */
     --color-haldi-ink: #7A5A00;
     --color-margin: #D2453B;
     --color-margin-soft: #F8DEDB;
@@ -173,7 +171,6 @@
         font-weight: 500;
     }
 
-    /* The signature: lined paper with a red ledger margin */
     .parchi {
         position: relative;
         background-color: var(--color-paper);
@@ -192,7 +189,6 @@
         opacity: 0.55;
     }
 
-    /* Each row draws its own ruled line, so lines stay aligned when a row wraps on a phone */
     .parchi-row {
         min-height: 48px;
         border-bottom: 1px solid var(--color-rule);
@@ -203,7 +199,6 @@
         color: var(--color-ink);
     }
 
-    /* Receipt-style dotted leader between what was written and what was matched */
     .leader {
         flex: 1;
         min-width: 1rem;
@@ -211,7 +206,6 @@
         transform: translateY(-0.3rem);
     }
 
-    /* Horizontally scrolling chip rows: swipe or shift+wheel, no visible bar */
     .no-scrollbar {
         scrollbar-width: none;
     }

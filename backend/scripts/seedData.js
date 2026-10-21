@@ -1,5 +1,4 @@
-// Starter catalogue for the seed script. Prices are in rupees.
-// aliases = what people actually type in the family group (Roman Urdu, short forms, common typos)
+// Starter catalogue, prices in rupees
 
 const categories = [
     { name: "Dairy & Eggs", icon: "🥛", description: "Milk, yogurt, butter, cheese and eggs", sortOrder: 1 },

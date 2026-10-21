@@ -40,7 +40,6 @@ export default function ListPage() {
     const handleMoveToCart = async () => {
         try {
             const result = await dispatch(moveListToCart()).unwrap();
-            // Moved items come back ticked off, and the cart count changes
             await Promise.all([dispatch(fetchList()), dispatch(fetchCart())]);
             if (result.moved.length && !result.skipped.length) {
                 dispatch(showToast(`${result.moved.length} items moved to your cart`));

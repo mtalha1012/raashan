@@ -15,14 +15,13 @@ const productSchema = new mongoose.Schema({
         min:[0, "Price cannot be negative"],
         max:[99999999, "Price cannot exceed 8 digits"]
     },
-    // What one unit of this product is, e.g. "1 litre", "12 pcs", "10 kg".
-    // The list parser reads the pack size from it, so "anday 12" becomes 1 x "12 pcs"
+    // Pack size like 1 litre or 12 pcs (used by list parser)
     unit:{
         type:String,
         required:[true, "Please enter product unit"],
         trim:true
     },
-    // Other names people type for this product, e.g. "doodh" for Milk
+    // Other names for product
     aliases:[{
         type:String,
         lowercase:true,

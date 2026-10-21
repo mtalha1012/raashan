@@ -11,7 +11,6 @@ export default function Layout() {
     const userId = useSelector((state) => state.auth.user?._id);
     const householdId = useSelector((state) => state.auth.user?.household);
 
-    // Cart count and open list items show in the navbar on every page
     useEffect(() => {
         if (!userId) return;
         dispatch(fetchCart());

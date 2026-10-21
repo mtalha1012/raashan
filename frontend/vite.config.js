@@ -11,7 +11,6 @@ export default defineConfig({
         },
     },
     server: {
-        // The Express API runs on 4000 in development; in production it serves this build itself
         proxy: {
             '/api': 'http://localhost:4000',
         },

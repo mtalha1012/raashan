@@ -5,7 +5,6 @@ import { setHouseholdId } from '@/features/auth/authSlice';
 import { showToast } from '@/features/ui/uiSlice';
 import { createHousehold, joinHousehold } from './householdSlice';
 
-// Shown on the list page until the user is part of a household
 export default function HouseholdSetup() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);

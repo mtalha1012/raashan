@@ -11,7 +11,6 @@ const SAMPLE = `[21/10/26, 9:14 pm] Ammi: doodh 2, anday 12 aur double roti
 [21/10/26, 9:16 pm] Abbu: cheeni 2 kg, chai patti bhi
 [21/10/26, 9:20 pm] Sara: chips aur achaar`;
 
-// Paste WhatsApp messages -> preview what each line became -> fix anything -> add to the list
 export default function PastePanel() {
     const dispatch = useDispatch();
     const [message, setMessage] = useState('');

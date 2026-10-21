@@ -8,7 +8,7 @@ const categorySchema = new mongoose.Schema({
         trim:true,
         maxLength:[40, "Category name cannot exceed 40 characters"]
     },
-    // Shown on category chips and as the fallback picture for products without an image
+    // Emoji used when product has no image
     icon:{
         type:String,
         default:"🛒"

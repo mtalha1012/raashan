@@ -15,7 +15,6 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    // Send people back to the page that asked them to log in
     const redirectTo = location.state?.from || '/list';
 
     if (user) return <Navigate to={redirectTo} replace />;

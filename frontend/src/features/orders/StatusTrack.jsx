@@ -12,7 +12,6 @@ export function StatusBadge({ status }) {
     return <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${BADGE_TONES[status]}`}>{status}</span>;
 }
 
-// Placed -> Packed -> Out for Delivery -> Delivered, with the steps reached filled in
 export function StatusTrack({ status }) {
     if (status === 'Cancelled') return <StatusBadge status={status} />;
 
@@ -23,7 +22,6 @@ export function StatusTrack({ status }) {
             {ORDER_STATUSES.map((step, index) => (
                 <li key={step} className="flex flex-1 items-center gap-1 sm:gap-2">
                     <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${index <= reached ? 'bg-ink' : 'bg-line'}`} />
-                    {/* On phones only the current step is named, the dots carry the rest */}
                     <span className={`text-xs ${index === reached ? 'inline' : 'hidden sm:inline'} ${index <= reached ? 'font-semibold text-text' : 'text-muted'}`}>
                         {step}
                     </span>

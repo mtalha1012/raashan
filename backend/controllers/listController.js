@@ -14,7 +14,6 @@ const myNickname = (req) => {
     return member?.nickname || req.user.name
 }
 
-// Only the fields the parser needs
 const loadProducts = () => Product.find().select("name aliases unit price stock image category").lean()
 
 const parseQuantity = (value, fallback) => {
@@ -37,7 +36,7 @@ const findOwnItem = async (req, next) => {
     return item
 }
 
-// Get household list: open items first, newest first
+// Get household list (open items first)
 exports.getList = asyncError(async (req, res, next) => {
     const items = await ListItem.find({ household: req.household._id })
     .populate("product", PRODUCT_FIELDS)
@@ -49,7 +48,7 @@ exports.getList = asyncError(async (req, res, next) => {
     })
 })
 
-// Add one item, by productId or by free text (text is matched to a product when possible)
+// Add item by productId or text
 exports.addItem = asyncError(async (req, res, next) => {
     const { productId, text } = req.body
     const quantity = parseQuantity(req.body.quantity, 1)
@@ -86,7 +85,7 @@ exports.addItem = asyncError(async (req, res, next) => {
     })
 })
 
-// Preview what a pasted WhatsApp message turns into -- nothing is saved
+// Parse pasted message (nothing is saved)
 exports.parseMessage = asyncError(async (req, res, next) => {
     const message = String(req.body.message || "")
     if (!message.trim()) return next(new ErrorHandler("Please paste a message", 400))
@@ -101,7 +100,7 @@ exports.parseMessage = asyncError(async (req, res, next) => {
     })
 })
 
-// Save the confirmed preview: [{ text, productId, quantity, requestedBy }]
+// Add parsed items to list
 exports.addItems = asyncError(async (req, res, next) => {
     const { items } = req.body
     if (!Array.isArray(items) || items.length === 0) return next(new ErrorHandler("No items to add", 400))
@@ -137,7 +136,7 @@ exports.addItems = asyncError(async (req, res, next) => {
     })
 })
 
-// Update quantity, text, linked product or ticked state
+// Update list item
 exports.updateItem = asyncError(async (req, res, next) => {
     const item = await findOwnItem(req, next)
     if (!item) return
@@ -179,7 +178,7 @@ exports.deleteItem = asyncError(async (req, res, next) => {
     })
 })
 
-// Remove every ticked item
+// Delete ticked items
 exports.clearDone = asyncError(async (req, res, next) => {
     const result = await ListItem.deleteMany({ household: req.household._id, done: true })
 
@@ -189,7 +188,7 @@ exports.clearDone = asyncError(async (req, res, next) => {
     })
 })
 
-// Put every open, linked item into my cart (as much as stock allows) and tick it off
+// Move open items to cart and tick them
 exports.moveToCart = asyncError(async (req, res, next) => {
     const items = await ListItem.find({ household: req.household._id, done: false }).populate("product")
 

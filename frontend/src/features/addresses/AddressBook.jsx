@@ -4,18 +4,15 @@ import { showToast } from '@/features/ui/uiSlice';
 import { createAddress, deleteAddress, fetchAddresses, updateAddress } from './addressesSlice';
 import AddressForm from './AddressForm';
 
-// Lists, adds, edits and deletes saved addresses. With onSelect it doubles as the checkout picker.
 export default function AddressBook({ selectedId, onSelect }) {
     const dispatch = useDispatch();
     const { items, loaded } = useSelector((state) => state.addresses);
-    // null = closed, 'new' = adding, or the address being edited
     const [editing, setEditing] = useState(null);
 
     useEffect(() => {
         dispatch(fetchAddresses());
     }, [dispatch]);
 
-    // Pre-select the default address at checkout
     useEffect(() => {
         if (onSelect && !selectedId && items.length) onSelect(items[0]._id);
     }, [items, selectedId, onSelect]);
@@ -23,7 +20,6 @@ export default function AddressBook({ selectedId, onSelect }) {
     const handleSave = async (address) => {
         const action = address._id ? updateAddress(address) : createAddress(address);
         const { address: saved } = await dispatch(action).unwrap();
-        // Saving can change which address is the default, so reload the list
         await dispatch(fetchAddresses());
         dispatch(showToast('Address saved'));
         setEditing(null);

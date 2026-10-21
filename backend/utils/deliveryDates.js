@@ -1,12 +1,12 @@
-// Delivery days are calendar days in Pakistan, whatever timezone the server runs in
+// Delivery dates use Pakistan time
 const TIME_ZONE = "Asia/Karachi"
 const BOOKING_DAYS_AHEAD = 6
-// A slot can still be booked today until this many minutes before it starts
+// Booking closes this many minutes before slot starts
 const SAME_DAY_CUTOFF_MINUTES = 60
 
 const DATE_FORMAT = /^\d{4}-\d{2}-\d{2}$/
 
-// Current date ("YYYY-MM-DD") and minutes since midnight in Pakistan
+// Current date and minutes since midnight in Pakistan
 const nowInPakistan = () => {
     const parts = new Intl.DateTimeFormat("en-CA", {
         timeZone: TIME_ZONE,
@@ -32,7 +32,7 @@ const addDays = (date, days) => {
     return day.toISOString().slice(0, 10)
 }
 
-// The days a customer can choose from, today first
+// Bookable dates starting today
 const bookableDates = () => {
     const { date } = nowInPakistan()
     return Array.from({ length: BOOKING_DAYS_AHEAD + 1 }, (_, i) => addDays(date, i))
@@ -45,7 +45,7 @@ const toMinutes = (time) => {
     return hours * 60 + minutes
 }
 
-// False for today's slots that start too soon (or already passed)
+// Check if slot can still be booked
 const isSlotOpen = (slot, date) => {
     const now = nowInPakistan()
     if (date !== now.date) return true

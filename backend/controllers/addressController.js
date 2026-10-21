@@ -10,7 +10,7 @@ const pickAddressFields = (body) => {
     return fields
 }
 
-// Make this the user's only default address
+// Unset default on user's other addresses
 const setOnlyDefault = async (address) => {
     await Address.updateMany({ user: address.user, _id: { $ne: address._id } }, { $set: { isDefault: false } })
 }
@@ -62,7 +62,7 @@ exports.updateAddress = asyncError(async (req, res, next) => {
     })
 })
 
-// Delete an address; if it was the default, the newest remaining one takes over
+// Delete address (newest one becomes default if needed)
 exports.deleteAddress = asyncError(async (req, res, next) => {
     const address = await findOwnAddress(req, next)
     if (!address) return

@@ -90,7 +90,6 @@ export default function AdminProducts() {
     const dispatch = useDispatch();
     const products = useSelector((state) => state.admin.products);
     const categories = useSelector((state) => state.shop.categories);
-    // null = closed, 'new' = adding, or the product being edited
     const [editing, setEditing] = useState(null);
     const [query, setQuery] = useState('');
 

@@ -12,7 +12,7 @@ const pickSlotFields = (body) => {
     return fields
 }
 
-// How many active orders each slot already has on a date
+// Count active orders per slot on a date
 const bookedCounts = async (date) => {
     const rows = await Order.aggregate([
         { $match: { "deliverySlot.date": date, orderStatus: { $ne: "Cancelled" } } },
@@ -21,7 +21,7 @@ const bookedCounts = async (date) => {
     return Object.fromEntries(rows.map((row) => [String(row._id), row.count]))
 }
 
-// Active slots for a date with remaining capacity -- ?date=YYYY-MM-DD (defaults to today)
+// Get slot availability for a date
 exports.getSlotAvailability = asyncError(async (req, res, next) => {
     const dates = bookableDates()
     const date = req.query.date || dates[0]
@@ -45,7 +45,7 @@ exports.getSlotAvailability = asyncError(async (req, res, next) => {
     })
 })
 
-// All slots including inactive ones -- Admin
+// Get all slots -- Admin
 exports.getAllSlots = asyncError(async (req, res, next) => {
     const slots = await DeliverySlot.find().sort({ startTime: 1 })
 
@@ -65,7 +65,7 @@ exports.createSlot = asyncError(async (req, res, next) => {
     })
 })
 
-// Update slot -- Admin (save() so the start/end check runs)
+// Update slot -- Admin
 exports.updateSlot = asyncError(async (req, res, next) => {
     const slot = await DeliverySlot.findById(req.params.id)
     if (!slot) return next(new ErrorHandler("Delivery slot not found", 404))
@@ -79,7 +79,7 @@ exports.updateSlot = asyncError(async (req, res, next) => {
     })
 })
 
-// Delete slot -- Admin (blocked while upcoming orders still use it)
+// Delete slot -- Admin
 exports.deleteSlot = asyncError(async (req, res, next) => {
     const slot = await DeliverySlot.findById(req.params.id)
     if (!slot) return next(new ErrorHandler("Delivery slot not found", 404))

@@ -2,7 +2,6 @@ const rupeeFormat = new Intl.NumberFormat('en-PK', { maximumFractionDigits: 0 })
 
 export const rupees = (amount) => `Rs ${rupeeFormat.format(amount || 0)}`;
 
-// "2026-10-22" -> "Thu 22 Oct"
 export const dayLabel = (date) =>
     new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 

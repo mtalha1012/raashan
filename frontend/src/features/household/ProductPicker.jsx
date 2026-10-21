@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { rupees } from '@/lib/format';
 
-// Search box for linking a list line to a store product. Results are local UI state, not app state.
 export default function ProductPicker({ initialQuery = '', onPick, onCancel }) {
     const [query, setQuery] = useState(initialQuery);
     const [results, setResults] = useState([]);
@@ -14,7 +13,6 @@ export default function ProductPicker({ initialQuery = '', onPick, onCancel }) {
             return;
         }
 
-        // Wait for a pause in typing before searching
         const timer = setTimeout(() => {
             api(`/products?keyword=${encodeURIComponent(keyword)}`)
                 .then((data) => setResults(data.products.slice(0, 6)))

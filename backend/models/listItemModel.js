@@ -1,6 +1,5 @@
 const mongoose = require("mongoose")
 
-// One line on a household's shared grocery list
 const listItemSchema = new mongoose.Schema({
     household:{
         type: mongoose.Schema.ObjectId,
@@ -8,14 +7,14 @@ const listItemSchema = new mongoose.Schema({
         required:true,
         index:true
     },
-    // What was written, e.g. "anday 12"
+    // Text as written
     text:{
         type:String,
         required:[true, "Please enter the item"],
         trim:true,
         maxLength:[80, "Item cannot exceed 80 characters"]
     },
-    // The store product it was matched to; null until someone links it
+    // Null until linked to a product
     product:{
         type: mongoose.Schema.ObjectId,
         ref:"Product",
@@ -32,7 +31,7 @@ const listItemSchema = new mongoose.Schema({
         ref:"User",
         required:true
     },
-    // Who asked for it -- the WhatsApp sender name, or the member's nickname
+    // Sender name or nickname
     requestedBy:{
         type:String,
         trim:true,

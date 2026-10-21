@@ -1,4 +1,3 @@
-// Product photo, or the category's emoji on a tinted tile when there is no photo
 const TINTS = ['bg-ink-soft', 'bg-haldi-soft', 'bg-leaf-soft', 'bg-margin-soft'];
 
 const tintFor = (text = '') => TINTS[[...text].reduce((sum, char) => sum + char.charCodeAt(0), 0) % TINTS.length];

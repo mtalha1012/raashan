@@ -6,3 +6,7 @@ backend/config/config.env
 
 npm-debug.log*
 .DS_Store
+
+# Local credentials
+*.env
+!backend/config/config.env.example

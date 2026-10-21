@@ -24,7 +24,6 @@ const cartSlice = createSlice({
     },
     reducers: {},
     extraReducers: (builder) => {
-        // Every cart endpoint answers with the whole cart
         const setCart = (state, action) => {
             state.cart = action.payload.cart;
             state.loaded = true;

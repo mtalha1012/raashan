@@ -8,7 +8,6 @@ const uiSlice = createSlice({
         toast: null,
     },
     reducers: {
-        // tone: 'success' | 'error'
         showToast: {
             reducer(state, action) {
                 state.toast = action.payload;

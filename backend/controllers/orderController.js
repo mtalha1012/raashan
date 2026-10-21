@@ -34,7 +34,7 @@ exports.newOrder = asyncError(async (req, res, next) => {
     let requestedItems = req.body.orderItems
     let fromCart = false
 
-    // Where and when
+    // Check address and delivery slot
     const address = addressId && await Address.findOne({ _id: addressId, user: req.user.id })
     if (!address) return next(new ErrorHandler("Please choose a delivery address", 400))
 
@@ -50,7 +50,6 @@ exports.newOrder = asyncError(async (req, res, next) => {
     const booked = (await bookedCounts(deliveryDate))[slot.id] || 0
     if (booked >= slot.capacity) return next(new ErrorHandler(`The ${slot.label} slot is full on ${deliveryDate}`, 400))
 
-    // What
     if (!requestedItems || requestedItems.length === 0) {
         const cart = await Cart.findOne({ user: req.user.id })
         if (!cart || cart.items.length === 0) {
@@ -131,7 +130,7 @@ exports.newOrder = asyncError(async (req, res, next) => {
     })
 })
 
-// Get single order -- owner, their household, or admin
+// Get single order -- owner, household or admin
 exports.getSingleOrder = asyncError(async (req, res, next) => {
     const order = await Order.findById(req.params.id).populate("user", "name email")
 
@@ -160,7 +159,7 @@ exports.myOrders = asyncError(async (req, res, next) => {
     })
 })
 
-// Cancel own order -- only before it is packed
+// Cancel own order -- only while it is placed
 exports.cancelOrder = asyncError(async (req, res, next) => {
     const order = await Order.findById(req.params.id)
 
@@ -201,7 +200,7 @@ exports.getAllOrders = asyncError(async (req, res, next) => {
     })
 })
 
-// Update order status -- Admin (cash is collected on delivery, so that marks it paid)
+// Update order status -- Admin
 exports.updateOrder = asyncError(async (req, res, next) => {
     const { status } = req.body
     const order = await Order.findById(req.params.id)

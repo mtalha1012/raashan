@@ -5,7 +5,6 @@ const { isAuthenticatedUser } = require("../middleware/auth")
 const { requireHousehold, requireHouseholdOwner } = require("../middleware/household")
 const router = express.Router()
 
-// Every route here needs a logged in user; most also need their household loaded
 const member = [isAuthenticatedUser, requireHousehold]
 const owner = [...member, requireHouseholdOwner]
 
@@ -22,7 +21,7 @@ router.route("/household/invite-code").put(owner, householdController.regenerate
 router.route("/household/members/:userId").delete(owner, householdController.removeMember)
 router.route("/household/orders").get(member, householdController.householdOrders)
 
-// The shared list
+// Household list
 router.route("/household/list")
 .get(member, listController.getList)
 .post(member, listController.addItem)

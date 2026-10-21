@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 
 const TIME_FORMAT = /^([01]\d|2[0-3]):[0-5]\d$/
 
-// A daily delivery window, e.g. 09:00 - 12:00, that takes a limited number of orders per day
+// Daily delivery window
 const deliverySlotSchema = new mongoose.Schema({
     label:{
         type:String,

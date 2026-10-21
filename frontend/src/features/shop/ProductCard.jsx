@@ -14,7 +14,6 @@ export default function ProductCard({ product }) {
     const [busy, setBusy] = useState(false);
     const outOfStock = product.stock === 0;
 
-    // Logged out visitors are sent to log in first
     const run = async (action, successMessage) => {
         if (!user) return navigate('/login', { state: { from: `/product/${product._id}` } });
         setBusy(true);

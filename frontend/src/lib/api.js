@@ -1,7 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-// Thin fetch wrapper for the Express API. The JWT lives in an httpOnly cookie,
-// so every request just sends cookies along; errors come back as the API's message.
 export async function api(path, { method = 'GET', body } = {}) {
     let res;
     try {
@@ -24,8 +22,6 @@ export async function api(path, { method = 'GET', body } = {}) {
     return data;
 }
 
-// createAsyncThunk that calls the API. makeRequest(arg) returns [path, options];
-// failures reject with the API's message so components can .unwrap() and show it.
 export const apiThunk = (type, makeRequest) =>
     createAsyncThunk(type, async (arg, { rejectWithValue }) => {
         try {

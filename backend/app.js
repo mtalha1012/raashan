@@ -8,7 +8,7 @@ const cookieParser = require("cookie-parser")
 // Parse nested query strings like ?price[gte]=100 (Express 5 defaults to the simple parser)
 app.set("query parser", "extended")
 
-// Behind Render's proxy, so req.protocol is "https"
+// Needed behind Render's proxy
 app.set("trust proxy", 1)
 
 app.use(express.json({ limit: "100kb" }))
@@ -35,12 +35,12 @@ app.use("/api/v1", address)
 app.use("/api/v1", slot)
 app.use("/api/v1", household)
 
-// In production the same server hosts the React build, so the site and API share one URL (no CORS, cookies just work)
+// Serve React build in production
 if (process.env.NODE_ENV === "production") {
     const clientPath = path.join(__dirname, "../frontend/dist")
     app.use(express.static(clientPath))
 
-    // Any non-API route is a React Router page
+    // Send all non API routes to React
     app.get(/^(?!\/api\/).*/, (req, res) => {
         res.sendFile(path.join(clientPath, "index.html"))
     })

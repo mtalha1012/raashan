@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowIcon } from '@/components/Icons';
 
-// What the family typed on the left, what Raashan matched on the right -- the whole idea in one picture
 const EXAMPLE = [
     { wrote: 'doodh 2', matched: 'Fresh Milk', detail: '2 × 1 litre' },
     { wrote: 'anday 12', matched: 'Eggs', detail: '1 × 12 pcs' },

@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { apiThunk } from '@/lib/api';
 
-// filters: { keyword, category, page }
 export const fetchProducts = apiThunk('shop/products', ({ keyword, category, page } = {}) => {
     const params = new URLSearchParams();
     if (keyword) params.set('keyword', keyword);

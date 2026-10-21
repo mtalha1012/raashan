@@ -1,5 +1,3 @@
-// Loading, empty and error states shared by every page
-
 export function Loader({ label = 'Loading' }) {
     return (
         <div className="flex items-center justify-center gap-3 py-16 text-muted" role="status">

@@ -1,4 +1,4 @@
-// Rupees. Shared by the order controller and the cart summary so both show the same numbers
+// Delivery fee in rupees
 const DELIVERY_FEE = 150
 const FREE_DELIVERY_THRESHOLD = 2500
 

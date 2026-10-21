@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
         enum: ["user", "admin"],
         default: "user"
     },
-    // A user belongs to at most one household at a time
+    // One household per user
     household: {
         type: mongoose.Schema.ObjectId,
         ref: "Household",

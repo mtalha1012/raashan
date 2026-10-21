@@ -19,13 +19,11 @@ export default function CheckoutPage() {
     const [error, setError] = useState('');
     const [placing, setPlacing] = useState(false);
 
-    // Availability changes with the day picked
     useEffect(() => {
         setSlotId(null);
         dispatch(fetchSlots(deliveryDate));
     }, [deliveryDate, dispatch]);
 
-    // Late in the day nothing is left today, so start on tomorrow instead of a wall of closed slots
     useEffect(() => {
         const nothingOpenToday = !deliveryDate && dates.length > 1 && slots.length > 0 && !slots.some((slot) => slot.available);
         if (nothingOpenToday) setDeliveryDate(dates[1]);
@@ -45,7 +43,6 @@ export default function CheckoutPage() {
         } catch (reason) {
             setError(reason);
             setPlacing(false);
-            // A slot may have filled up meanwhile
             dispatch(fetchSlots(date));
         }
     };

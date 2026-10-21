@@ -7,7 +7,7 @@ const householdSchema = new mongoose.Schema({
         trim:true,
         maxLength:[40, "Household name cannot exceed 40 characters"]
     },
-    // Short code other family members type to join
+    // Code used to join
     inviteCode:{
         type:String,
         required:true,
@@ -26,7 +26,7 @@ const householdSchema = new mongoose.Schema({
                 ref:"User",
                 required:true
             },
-            // What the family calls this person, e.g. "Ammi" -- also how WhatsApp senders are matched
+            // Name shown on list items
             nickname:{
                 type:String,
                 trim:true,

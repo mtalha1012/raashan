@@ -7,7 +7,6 @@ import { rupees } from '@/lib/format';
 import { deleteListItem, updateListItem } from './householdSlice';
 import ProductPicker from './ProductPicker';
 
-// One line of the family parchi: what was written (handwriting) .... what it matched (type)
 export default function ParchiRow({ item }) {
     const dispatch = useDispatch();
     const [picking, setPicking] = useState(false);
@@ -40,7 +39,6 @@ export default function ParchiRow({ item }) {
                 aria-label={`Bought ${item.text}`}
             />
 
-            {/* Full width on phones so the handwriting never gets squeezed; controls wrap below */}
             <span className="flex w-full min-w-0 items-end gap-2 sm:w-auto sm:flex-1">
                 <span className={`handwriting truncate text-xl leading-tight sm:text-2xl ${item.done ? 'line-through decoration-margin decoration-2' : ''}`}>
                     {item.text}

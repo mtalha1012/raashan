@@ -22,7 +22,6 @@ import AdminPage from '@/features/admin/AdminPage';
 export default function App() {
     const dispatch = useDispatch();
 
-    // Restore the session from the cookie on first load
     useEffect(() => {
         dispatch(loadUser());
     }, [dispatch]);

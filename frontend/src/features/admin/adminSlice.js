@@ -8,7 +8,7 @@ export const saveProduct = apiThunk('admin/saveProduct', ({ _id, ...product }) =
 );
 export const deleteProduct = apiThunk('admin/deleteProduct', (id) => [`/products/${id}`, { method: 'DELETE' }]);
 
-// Categories (listing is public, it lives in the shop slice)
+// Categories
 export const saveCategory = apiThunk('admin/saveCategory', ({ _id, ...category }) =>
     _id
         ? [`/admin/categories/${_id}`, { method: 'PUT', body: category }]
@@ -36,7 +36,6 @@ export const fetchAdminUsers = apiThunk('admin/users', () => ['/admin/users']);
 export const updateUserRole = apiThunk('admin/userRole', ({ id, role }) => [`/admin/user/${id}`, { method: 'PUT', body: { role } }]);
 export const deleteUser = apiThunk('admin/deleteUser', (id) => [`/admin/user/${id}`, { method: 'DELETE' }]);
 
-// Replace the saved record in a list, or add it at the top when it is new
 const upsert = (list, record) =>
     list.some((item) => item._id === record._id)
         ? list.map((item) => (item._id === record._id ? record : item))

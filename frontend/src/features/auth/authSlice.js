@@ -22,11 +22,9 @@ const authSlice = createSlice({
     name: 'auth',
     initialState: {
         user: null,
-        // False until the first /me call answers, so protected pages don't bounce to login on refresh
         checked: false,
     },
     reducers: {
-        // The household changed (created / joined / left), keep the user's copy in step
         setHouseholdId(state, action) {
             if (state.user) state.user.household = action.payload;
         },

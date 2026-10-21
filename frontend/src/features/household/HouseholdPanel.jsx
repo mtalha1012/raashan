@@ -4,7 +4,6 @@ import { setHouseholdId } from '@/features/auth/authSlice';
 import { showToast } from '@/features/ui/uiSlice';
 import { deleteHousehold, leaveHousehold, newInviteCode, removeMember, renameHousehold, setNickname } from './householdSlice';
 
-// Members, invite code and household settings
 export default function HouseholdPanel({ household }) {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);

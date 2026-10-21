@@ -11,7 +11,7 @@ class ApiFeatures {
             $options: "i"
         } : null
 
-        // Match the product name or any alias, so "doodh" finds Milk
+        // Search name and aliases
         const keyword = pattern ? { $or: [{ name: pattern }, { aliases: pattern }] } : {}
 
         this.query = this.query.find({...keyword})

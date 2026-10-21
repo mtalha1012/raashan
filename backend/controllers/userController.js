@@ -64,7 +64,7 @@ exports.forgotPassword = asyncError(async (req, res, next) => {
         validateBeforeSave: false
     })
 
-    // The link opens the frontend's reset page, which calls PUT /api/v1/password/reset/:token
+    // Reset link opens the frontend
     const clientUrl = process.env.CLIENT_URL || `${req.protocol}://${req.get("host")}`
     const resetPasswordUrl = `${clientUrl}/password/reset/${resetToken}`
     const message = `Your password reset token is \n\n ${resetPasswordUrl} \n\n If you have not requested this email, 
@@ -150,7 +150,7 @@ exports.updatePassword = asyncError(async (req, res, next) => {
     sendToken(user, 200, res)
 })
 
-// Update logged in user's name / email / phone
+// Update logged in user's profile
 exports.updateProfile = asyncError(async (req, res, next) => {
     const newUserData = {}
     if (req.body.name) newUserData.name = req.body.name
@@ -215,7 +215,7 @@ exports.updateUserRole = asyncError(async (req, res, next) => {
     })
 })
 
-// Delete user -- Admin (they also leave their household)
+// Delete user -- Admin
 exports.deleteUser = asyncError(async (req, res, next) => {
     const user = await User.findById(req.params.id)
 

@@ -1,4 +1,3 @@
-// Shared frame for the login / register / password pages
 export default function AuthCard({ title, subtitle, children, footer }) {
     return (
         <div className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-line bg-white md:grid-cols-[1fr_1.1fr]">

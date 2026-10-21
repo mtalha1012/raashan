@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const ORDER_STATUSES = ["Placed", "Packed", "Out for Delivery", "Delivered", "Cancelled"]
 
 const orderSchema = new mongoose.Schema({
-    // Copied from the user's saved address so later edits don't change past orders
+    // Copy of address when order was placed
     shippingInfo:{
         line1:{ type:String, required:[true, "Please enter address"] },
         area:{ type:String, required:[true, "Please enter area"] },
@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema({
             required:true
         },
         label:{ type:String, required:true },
-        // Calendar day in Pakistan time, "YYYY-MM-DD"
+        // YYYY-MM-DD in Pakistan time
         date:{ type:String, required:true }
     },
     orderItems:[
@@ -39,7 +39,7 @@ const orderSchema = new mongoose.Schema({
         ref:"User",
         required:true
     },
-    // Set when the person ordering is in a household, so the whole family sees the order
+    // So household members can see the order
     household:{
         type: mongoose.Schema.ObjectId,
         ref:"Household",

@@ -6,7 +6,6 @@ import { showToast } from '@/features/ui/uiSlice';
 import { dateTime, dayLabel, rupees } from '@/lib/format';
 import { deleteOrder, fetchAdminOrders, updateOrderStatus } from './adminSlice';
 
-// Mirrors the API's allowed transitions, so only valid next steps are offered
 const NEXT_STATUSES = {
     Placed: ['Packed', 'Cancelled'],
     Packed: ['Out for Delivery', 'Cancelled'],

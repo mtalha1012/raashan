@@ -1,4 +1,4 @@
-// node --test backend/tests -- runs against the seed catalogue, no database needed
+// List parser tests: npm test
 const test = require("node:test")
 const assert = require("node:assert/strict")
 const { parseList, unitInfo } = require("../utils/listParser")
@@ -6,7 +6,7 @@ const { products } = require("../scripts/seedData")
 
 const catalogue = products.map(([name, category, price, unit, aliases]) => ({ name, unit, aliases }))
 
-// Shorthand: message -> [[productName or null, quantity, from], ...]
+// Returns [productName, quantity, from] for each item
 const parse = (message) => parseList(message, catalogue).map((item) => [item.product?.name ?? null, item.quantity, item.from])
 
 test("reads the pitch example", () => {

@@ -8,7 +8,7 @@ const ApiFeatures = require("../utils/apifeatures")
 
 const CATEGORY_FIELDS = "name icon"
 
-// Aliases may arrive as "doodh, milk pack" from the admin form
+// Aliases can be an array or comma separated string
 const cleanAliases = (aliases) => {
     if (aliases === undefined) return undefined
     const list = Array.isArray(aliases) ? aliases : String(aliases).split(",")
@@ -40,7 +40,7 @@ exports.createProduct = asyncError (async (req, res, next) => {
     })
 })
 
-// Public listing with ?keyword=, ?category=, ?price[lte]= and ?page=
+// Get all products
 exports.getAllProducts = asyncError (async (req, res) => {
     const resultPerPage = 12
     const productCount = await Product.countDocuments()
@@ -62,7 +62,7 @@ exports.getAllProducts = asyncError (async (req, res) => {
     })
 })
 
-// Every product, unpaginated -- Admin
+// Get all products without pagination -- Admin
 exports.getAdminProducts = asyncError (async (req, res) => {
     const products = await Product.find().sort({ name: 1 }).populate("category", CATEGORY_FIELDS)
 
@@ -94,7 +94,7 @@ exports.updateProduct = asyncError (async (req, res, next) => {
     })
 })
 
-// Delete product -- Admin (also unlinks it from carts and household lists)
+// Delete product -- Admin (also removes it from carts and lists)
 exports.deleteProduct = asyncError (async (req, res, next) => {
     const product = await Product.findById(req.params.id)
     if (!product) return next(new ErrorHandler("Product not found", 404))

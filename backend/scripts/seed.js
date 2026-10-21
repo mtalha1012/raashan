@@ -1,5 +1,5 @@
-// Fills the database with the starter catalogue, delivery slots and a demo family: npm run seed
-// WARNING: wipes every Raashan collection first. Pass --keep-users to keep existing accounts.
+// Seed database with products, slots and demo family: npm run seed
+// Deletes existing data first, use --keep-users to keep accounts
 const dotenv = require("dotenv")
 const mongoose = require("mongoose")
 
@@ -16,7 +16,7 @@ const Cart = require("../models/cartModel")
 const Order = require("../models/orderModel")
 const data = require("./seedData")
 
-// Demo accounts -- test values only, also listed in the README so reviewers can log in
+// Demo accounts
 const DEMO_PASSWORD = "raashan-demo-2026"
 const DEMO_USERS = [
     { name: "Raashan Admin", email: "admin@raashan.test", role: "admin" },
@@ -38,7 +38,7 @@ const seed = async () => {
     if (keepUsers) await User.updateMany({}, { $set: { household: null } })
     else await User.deleteMany()
 
-    // Users (create one by one so the password hook runs)
+    // Users (one by one so passwords get hashed)
     const users = {}
     for (const demo of DEMO_USERS) {
         users[demo.email] = await User.findOne({ email: demo.email }) ||
@@ -60,7 +60,7 @@ const seed = async () => {
 
     await DeliverySlot.insertMany(data.slots)
 
-    // A demo family with a half-filled list
+    // Demo household
     const familyMembers = DEMO_USERS.filter((demo) => demo.nickname)
     const household = await Household.create({
         name: "Talha's Family",

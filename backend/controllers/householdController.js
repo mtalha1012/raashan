@@ -6,7 +6,7 @@ const User = require("../models/userModel")
 const ErrorHandler = require("../utils/errorHandler")
 const asyncError = require("../middleware/asyncError")
 
-// No 0/O or 1/I so codes can be read out over the phone
+// No 0/O or 1/I to avoid confusion
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 const MAX_MEMBERS = 12
 
@@ -27,15 +27,14 @@ const sendHousehold = async (household, statusCode, res) => {
     })
 }
 
-// Removes every trace of a household once its last member is gone
+// Delete household with its list
 const destroyHousehold = async (household) => {
     await ListItem.deleteMany({ household: household._id })
     await User.updateMany({ household: household._id }, { $set: { household: null } })
     await household.deleteOne()
 }
 
-// Takes a user out of their household; ownership passes to the longest standing member,
-// and a household left with nobody in it is deleted
+// Remove user from household (empty household gets deleted)
 const removeFromHousehold = async (user) => {
     const household = user.household && await Household.findById(user.household)
 
@@ -67,7 +66,7 @@ exports.getMyHousehold = asyncError(async (req, res, next) => {
     await sendHousehold(household, 200, res)
 })
 
-// Create a household and become its owner
+// Create household
 exports.createHousehold = asyncError(async (req, res, next) => {
     if (req.user.household) return next(new ErrorHandler("You are already in a household. Leave it first", 400))
 
@@ -84,7 +83,7 @@ exports.createHousehold = asyncError(async (req, res, next) => {
     await sendHousehold(household, 201, res)
 })
 
-// Join a household with its invite code
+// Join household with invite code
 exports.joinHousehold = asyncError(async (req, res, next) => {
     if (req.user.household) return next(new ErrorHandler("You are already in a household. Leave it first", 400))
 
@@ -107,7 +106,7 @@ exports.joinHousehold = asyncError(async (req, res, next) => {
     await sendHousehold(household, 200, res)
 })
 
-// Rename household -- owner
+// Rename household -- Owner
 exports.updateHousehold = asyncError(async (req, res, next) => {
     if (req.body.name !== undefined) req.household.name = req.body.name
     await req.household.save()
@@ -115,7 +114,7 @@ exports.updateHousehold = asyncError(async (req, res, next) => {
     await sendHousehold(req.household, 200, res)
 })
 
-// Change your own nickname in the household
+// Update own nickname
 exports.updateNickname = asyncError(async (req, res, next) => {
     const member = req.household.members.find((member) => member.user.toString() === req.user.id)
     member.nickname = req.body.nickname || req.user.name
@@ -124,7 +123,7 @@ exports.updateNickname = asyncError(async (req, res, next) => {
     await sendHousehold(req.household, 200, res)
 })
 
-// New invite code, old one stops working -- owner
+// New invite code -- Owner
 exports.regenerateInviteCode = asyncError(async (req, res, next) => {
     req.household.inviteCode = await generateInviteCode()
     await req.household.save()
@@ -132,7 +131,7 @@ exports.regenerateInviteCode = asyncError(async (req, res, next) => {
     await sendHousehold(req.household, 200, res)
 })
 
-// Remove a member -- owner
+// Remove member -- Owner
 exports.removeMember = asyncError(async (req, res, next) => {
     if (req.params.userId === req.user.id) {
         return next(new ErrorHandler("Use leave household to remove yourself", 400))
@@ -161,7 +160,7 @@ exports.leaveHousehold = asyncError(async (req, res, next) => {
     })
 })
 
-// Delete household with its list for everyone -- owner
+// Delete household -- Owner
 exports.deleteHousehold = asyncError(async (req, res, next) => {
     await destroyHousehold(req.household)
 
@@ -171,7 +170,7 @@ exports.deleteHousehold = asyncError(async (req, res, next) => {
     })
 })
 
-// Orders placed by anyone in the household
+// Get household orders
 exports.householdOrders = asyncError(async (req, res, next) => {
     const orders = await Order.find({ household: req.household._id })
     .populate("user", "name")

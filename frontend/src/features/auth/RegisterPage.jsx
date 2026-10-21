@@ -25,7 +25,6 @@ export default function RegisterPage() {
         try {
             await dispatch(register(form)).unwrap();
             dispatch(showToast('Account created'));
-            // Next step is setting up or joining the family list
             navigate('/list', { replace: true });
         } catch (message) {
             setError(message);
