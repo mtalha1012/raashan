@@ -1,185 +1,200 @@
-# E-Commerce Backend
+# Raashan
 
-A production-style REST API for an e-commerce store, built with **Node.js, Express 5 and MongoDB (Mongoose)**.
+A MERN grocery delivery app built around how Pakistani families actually shop: someone posts *"doodh 2, anday 12 aur double roti"* in the family WhatsApp group, and someone else retypes it at the shop. Raashan reads those messages, matches each line to a product, and keeps **one shared list for the whole household**. When the list is ready, it goes into a cart and becomes a cash-on-delivery order in a delivery slot.
 
-Features:
+Built with **MongoDB, Express 5, React 19 + Redux Toolkit, Node.js**.
 
-- **Auth** – register / login / logout with JWT (httpOnly cookie *or* `Authorization: Bearer` header), bcrypt-hashed passwords, forgot / reset password by email, role-based access (`user`, `admin`)
-- **Products** – full CRUD (admin), public listing with search, filters and pagination
-- **Cart** – per-user cart with stock checks and live totals
-- **Orders** – place orders from the cart or an explicit item list, server-side pricing, atomic stock reservation, cancel / status workflow, admin management
-- Centralised error handling (validation, bad ObjectIds, duplicate keys, JWT errors, unknown routes)
+**Live:** _add your Render URL here_ · **Repo:** _add your GitHub URL here_
 
-## Project structure (MVC)
+## Features
+
+- **Auth**: register, log in, log out, forgot / reset password by email, change password. JWT in an httpOnly cookie (or `Authorization: Bearer`), bcrypt-hashed passwords, `user` / `admin` roles. Protected and admin-only routes on both the API and the React side.
+- **Households**: create one, share a six-character invite code, join with it. Nicknames ("Ammi", "Abbu"), owner can rename, remove members, or issue a new code.
+- **Shared family list**: everyone in the household writes on the same list. Add a line by typing it ("dahi 1 kg"), from a product page, or by **pasting WhatsApp messages**.
+- **WhatsApp list reader** (`backend/utils/listParser.js`): strips chat timestamps, keeps who sent each line, splits on commas / "aur" / "and", understands Roman Urdu names and quantities ("anday 12" → 1 × Eggs 12 pcs, "atta 20 kg" → 2 × 10 kg bag, "aadha kilo dahi"), and forgives one typo. Every result is shown for the user to confirm first. Nothing is guessed silently: unmatched lines stay on the list to be linked by hand.
+- **List → cart**: one tap moves every linked, open line into your cart (as much as stock allows) and ticks it off. Anything skipped is listed with the reason.
+- **Shop**: categories, search by name *or* alias ("doodh" finds Milk), pagination.
+- **Checkout**: saved addresses, delivery day (today + 6 days, Pakistan time) and slot with a daily capacity. Today's slots close an hour before they start.
+- **Orders**: stock reserved atomically, prices always from the database, delivery fee under Rs 2,500. Status flow `Placed → Packed → Out for Delivery → Delivered`. Customers cancel while still `Placed`. The whole household can see each other's orders.
+- **Admin**: manage orders, products (with aliases), categories, delivery slots and users.
+
+## CRUD resources
+
+| Resource | Create | Read | Update | Delete | Who |
+| --- | --- | --- | --- | --- | --- |
+| Products | ✔ | ✔ | ✔ | ✔ | Admin (read is public) |
+| Categories | ✔ | ✔ | ✔ | ✔ | Admin (read is public) |
+| Delivery slots | ✔ | ✔ | ✔ | ✔ | Admin (availability is public) |
+| Households | ✔ | ✔ | ✔ | ✔ | Members / owner |
+| Family list items | ✔ | ✔ | ✔ | ✔ | Household members |
+| Addresses | ✔ | ✔ | ✔ | ✔ | Each user, own addresses only |
+| Cart | ✔ | ✔ | ✔ | ✔ | Each user |
+| Orders | ✔ | ✔ | ✔ (status / cancel) | ✔ | Customer + admin |
+| Users | ✔ (register) | ✔ | ✔ | ✔ | Self + admin |
+
+## Project structure
 
 ```
-backend/
-├── app.js                 # Express app: middleware, routes, error handler
-├── server.js              # Loads env, connects DB, starts server
-├── config/
-│   ├── config.env.example # Template for environment variables
-│   └── database.js        # MongoDB connection
-├── models/                # Mongoose schemas (M)
-│   ├── userModel.js
-│   ├── productModel.js
-│   ├── cartModel.js
-│   └── orderModel.js
-├── controllers/           # Request handlers / business logic (C)
-│   ├── userController.js
-│   ├── productController.js
-│   ├── cartController.js
-│   └── orderController.js
-├── routes/                # URL → controller mapping
-│   ├── userRoute.js
-│   ├── productRoute.js
-│   ├── cartRoute.js
-│   └── orderRoute.js
-├── middleware/
-│   ├── auth.js            # isAuthenticatedUser, authorizedRoles
-│   ├── asyncError.js      # Wraps async handlers
-│   └── error.js           # Global error handler
-├── utils/                 # ErrorHandler, ApiFeatures, jwtToken, sendEmail
-└── scripts/
-    └── makeAdmin.js       # Promote a user to admin
+raashan/
+├── backend/                 # Express API (MVC)
+│   ├── app.js               # Middleware, routes, error handler; serves frontend/dist in production
+│   ├── server.js            # Loads env, connects MongoDB, starts the server
+│   ├── config/              # config.env.example, database.js
+│   ├── models/              # User, Product, Category, Household, ListItem, Address, DeliverySlot, Cart, Order
+│   ├── controllers/         # Request handlers
+│   ├── routes/              # URL → controller mapping
+│   ├── middleware/          # auth (login + roles), household, asyncError, error
+│   ├── utils/               # listParser, deliveryDates, pricing, apifeatures, jwtToken, sendEmail
+│   ├── scripts/             # seed.js + seedData.js, makeAdmin.js
+│   └── tests/               # listParser.test.js (node:test)
+├── frontend/                # React + Vite + Redux Toolkit + Tailwind
+│   └── src/
+│       ├── app/store.js
+│       ├── lib/             # api.js (fetch + apiThunk), format.js
+│       ├── components/      # Layout, Navbar, ProtectedRoute, shared UI
+│       └── features/        # auth, shop, cart, household, addresses, orders, admin, ui
+│                            # each: <name>Slice.js + its pages / components
+└── render.yaml              # One-click Render deploy
 ```
 
-The "view" layer is the JSON the API returns.
+## Run it locally
 
-## Setup
-
-**Prerequisites:** Node.js 20+ and MongoDB (local or Atlas).
+**Needs:** Node.js 20+ and MongoDB (local, or a MongoDB Atlas connection string).
 
 ```bash
 git clone <your-repo-url>
-cd ecommerce-backend
+cd raashan
 npm install
-```
-
-Create the env file from the template and fill in your values:
-
-```bash
+npm install --prefix frontend
 cp backend/config/config.env.example backend/config/config.env
 ```
 
-| Variable | Description |
-| --- | --- |
-| `PORT` | Port the server listens on (e.g. `4000`) |
-| `DB_URI` | MongoDB connection string |
-| `JWT_SECRET` | Long random string used to sign tokens |
-| `JWT_EXPIRE` | Token lifetime, e.g. `5d` |
-| `COOKIE_EXPIRE` | Cookie lifetime in days, e.g. `7` |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_EMAIL`, `SMTP_PASSWORD`, `SMTP_FROM_NAME` | Mail settings for the forgot-password email |
-
-`config.env` is git-ignored – never commit real secrets. Variables already set in the environment (e.g. on a hosting provider) take precedence over the file.
-
-Run the server:
+Fill in `backend/config/config.env` (at least `DB_URI` and `JWT_SECRET`), then load the starter catalogue and demo family:
 
 ```bash
-npm run dev   # with nodemon
-npm start     # plain node
+npm run seed
 ```
 
-The API is served at `http://localhost:<PORT>/api/v1`.
-
-### Creating an admin
-
-New accounts are always `user`. Register normally, then promote the account:
+Start the API (port 4000) and the React dev server (port 5173, proxies `/api` to the API) in two terminals:
 
 ```bash
-npm run make-admin -- admin@example.com
+npm run dev
 ```
 
-After that, the admin can change other users' roles through `PUT /api/v1/admin/user/:id`.
+```bash
+npm run client
+```
 
-## Authentication
+Open http://localhost:5173.
 
-`POST /login` and `POST /register` return a JWT and also set it as an httpOnly `token` cookie. Protected routes accept either:
+### Demo accounts (created by `npm run seed`)
 
-- the `token` cookie (browsers / Postman keep it automatically), or
-- the header `Authorization: Bearer <token>`
+| Email | Role | Notes |
+| --- | --- | --- |
+| `admin@raashan.test` | admin | Sees the Admin tab |
+| `talha@raashan.test` | user | Owner of "Talha's Family", has a saved address |
+| `ammi@raashan.test` | user | Member of the same household |
 
-Responses: `401` when not logged in or the token is invalid/expired, `403` when the role isn't allowed.
+All three use the password `raashan-demo-2026`. The demo household's invite code is `KHAN26`.
 
-## API routes
+> `npm run seed` wipes the Raashan collections first. Use `npm run seed -- --keep-users` to keep existing accounts.
 
-All routes are prefixed with `/api/v1`. 🔒 = login required, 👑 = admin only.
+To promote any account to admin: `npm run make-admin -- someone@example.com`
 
-### Users & auth
+### Tests
+
+```bash
+npm test
+```
+
+Runs the list-reader tests against the seed catalogue (no database needed).
+
+## Deploy (Render + MongoDB Atlas)
+
+One Render web service runs the API and serves the built React app, so the site and API share a URL: no CORS setup, and the auth cookie just works.
+
+1. **MongoDB Atlas**: create a free cluster, a database user, and allow access from anywhere (`0.0.0.0/0`). Copy the connection string and add a database name, e.g. `.../raashan?retryWrites=true&w=majority`.
+2. **Seed it** from your machine: put that string in `DB_URI` in `backend/config/config.env` and run `npm run seed`.
+3. **Push** this repo to GitHub.
+4. **Render**: New → Blueprint → pick the repo. It reads `render.yaml`. When asked, set `DB_URI` (the Atlas string) and `CLIENT_URL` (your Render URL, e.g. `https://raashan.onrender.com`; you can fill it in after the first deploy). `JWT_SECRET` is generated for you.
+5. Optional: add the `SMTP_*` variables from `config.env.example` so forgot-password emails send.
+
+Build command: `npm install && npm run build` (installs and builds `frontend/`). Start command: `npm start`. Health check: `/api/v1/health`.
+
+Free Render services sleep after 15 minutes idle, so the first visit after a break takes ~30 seconds.
+
+## API reference
+
+All routes are prefixed with `/api/v1`. 🔒 = login required, 🏠 = must be in a household, 👑 = admin only. Errors always look like `{ "success": false, "message": "..." }`.
+
+### Auth & users
 
 | Method | Route | Access | Body / notes |
 | --- | --- | --- | --- |
-| POST | `/register` | Public | `{ name, email, password }` |
+| POST | `/register` | Public | `{ name, email, password, phone? }` |
 | POST | `/login` | Public | `{ email, password }` |
 | GET | `/logout` | Public | Clears the cookie |
-| POST | `/password/forgot` | Public | `{ email }` – emails a reset link |
+| POST | `/password/forgot` | Public | `{ email }`, emails a link to `CLIENT_URL/password/reset/:token` |
 | PUT | `/password/reset/:token` | Public | `{ password, confirmPassword }` |
-| GET | `/me` | 🔒 | Current user's profile |
-| PUT | `/me/update` | 🔒 | `{ name?, email? }` |
+| GET | `/me` | 🔒 | Current user |
+| PUT | `/me/update` | 🔒 | `{ name?, email?, phone? }` |
 | PUT | `/password/update` | 🔒 | `{ oldPassword, newPassword, confirmPassword }` |
-| GET | `/admin/users` | 👑 | List all users |
-| GET | `/admin/user/:id` | 👑 | Get one user |
-| PUT | `/admin/user/:id` | 👑 | `{ role: "user" \| "admin" }` |
-| DELETE | `/admin/user/:id` | 👑 | Delete a user |
+| GET / PUT / DELETE | `/admin/users`, `/admin/user/:id` | 👑 | List, change role, delete (also leaves their household) |
 
-### Products
+### Catalogue
 
 | Method | Route | Access | Body / notes |
 | --- | --- | --- | --- |
-| GET | `/products` | Public | Query: `keyword`, `category`, `price[gte]`, `price[lte]`, `rating[gte]`, `page` (5 per page) |
-| GET | `/products/:id` | Public | Product details |
-| POST | `/products/new` | 👑 | `{ name, description, price, category, stock, images: [{ publicId, url }] }` |
-| PUT | `/products/:id` | 👑 | Any product fields to update |
-| DELETE | `/products/:id` | 👑 | Delete product |
+| GET | `/products` | Public | `keyword` (name or alias), `category` (id), `price[gte]`, `price[lte]`, `page` (12 per page) |
+| GET | `/products/:id` | Public | |
+| POST | `/products/new` | 👑 | `{ name, category, price, unit, stock, aliases?, image?, description? }`. `aliases` can be an array or `"doodh, dudh"` |
+| PUT / DELETE | `/products/:id` | 👑 | Delete also removes it from carts and unlinks it from lists |
+| GET | `/admin/products` | 👑 | All products, unpaginated |
+| GET | `/categories`, `/categories/:id` | Public | Includes `productCount` |
+| POST / PUT / DELETE | `/admin/categories[/:id]` | 👑 | `{ name, icon, description, sortOrder }`. Delete is blocked while products use it |
 
-Example: `GET /api/v1/products?keyword=phone&category=tech&price[gte]=100&price[lte]=1000&page=2`
-
-### Cart
-
-| Method | Route | Access | Body / notes |
-| --- | --- | --- | --- |
-| GET | `/cart` | 🔒 | Cart with populated products, `totalItems`, `totalPrice` |
-| POST | `/cart` | 🔒 | `{ productId, quantity? }` – adds, or increments if already in cart |
-| PUT | `/cart/:productId` | 🔒 | `{ quantity }` – set quantity |
-| DELETE | `/cart/:productId` | 🔒 | Remove one product |
-| DELETE | `/cart` | 🔒 | Empty the cart |
-
-Quantities are checked against product stock.
-
-### Orders
+### Households & the family list
 
 | Method | Route | Access | Body / notes |
 | --- | --- | --- | --- |
-| POST | `/order/new` | 🔒 | `{ shippingInfo, orderItems?, paymentInfo? }` (see below) |
-| GET | `/orders/me` | 🔒 | Current user's orders |
-| GET | `/order/:id` | 🔒 | Order owner or admin only |
-| PUT | `/order/:id/cancel` | 🔒 | Owner can cancel while `Processing` |
+| GET | `/household` | 🔒 | Your household, or `null` |
+| POST | `/household` | 🔒 | `{ name, nickname? }`, you become the owner |
+| POST | `/household/join` | 🔒 | `{ inviteCode, nickname? }` |
+| PUT | `/household` | 🏠 owner | `{ name }` |
+| DELETE | `/household` | 🏠 owner | Deletes it and its list for everyone |
+| POST | `/household/leave` | 🏠 | Ownership passes on; the last one out deletes it |
+| PUT | `/household/nickname` | 🏠 | `{ nickname }` |
+| PUT | `/household/invite-code` | 🏠 owner | New code, the old one stops working |
+| DELETE | `/household/members/:userId` | 🏠 owner | |
+| GET | `/household/orders` | 🏠 | Orders placed by anyone in the household |
+| GET | `/household/list` | 🏠 | Open items first |
+| POST | `/household/list` | 🏠 | `{ productId }` or `{ text }` (text is matched automatically), `quantity?` |
+| POST | `/household/list/parse` | 🏠 | `{ message }`, returns a preview, saves nothing |
+| POST | `/household/list/bulk` | 🏠 | `{ items: [{ text, productId?, quantity, requestedBy? }] }`, up to 50 |
+| PUT | `/household/list/:id` | 🏠 | `{ quantity?, text?, done?, productId? }` |
+| DELETE | `/household/list/:id` | 🏠 | |
+| DELETE | `/household/list/done` | 🏠 | Clears ticked items |
+| POST | `/household/list/to-cart` | 🏠 | Moves open, linked items into your cart. Returns `{ moved, skipped }` |
+
+### Addresses, slots, cart, orders
+
+| Method | Route | Access | Body / notes |
+| --- | --- | --- | --- |
+| GET / POST | `/addresses` | 🔒 | `{ label, line1, area, city, phone, isDefault? }`. The first address becomes the default |
+| PUT / DELETE | `/addresses/:id` | 🔒 | Own addresses only |
+| GET | `/slots?date=YYYY-MM-DD` | Public | Active slots with `remaining`, `available` and `reason`, plus the bookable `dates` |
+| GET / POST | `/admin/slots` | 👑 | `{ label, startTime: "09:00", endTime: "12:00", capacity, isActive }` |
+| PUT / DELETE | `/admin/slots/:id` | 👑 | Delete is blocked while upcoming orders use the slot |
+| GET / POST / DELETE | `/cart` | 🔒 | Get, add `{ productId, quantity? }`, empty. Includes `deliveryFee` |
+| PUT / DELETE | `/cart/:productId` | 🔒 | Set quantity, remove |
+| POST | `/order/new` | 🔒 | `{ addressId, slotId, deliveryDate, orderItems? }`. Uses the cart when `orderItems` is omitted |
+| GET | `/orders/me` | 🔒 | |
+| GET | `/order/:id` | 🔒 | Owner, their household, or admin |
+| PUT | `/order/:id/cancel` | 🔒 | Owner, while `Placed` |
 | GET | `/admin/orders` | 👑 | All orders + `totalAmount` (excluding cancelled) |
-| PUT | `/admin/order/:id` | 👑 | `{ status }` – see status flow |
-| DELETE | `/admin/order/:id` | 👑 | Delete order |
+| PUT | `/admin/order/:id` | 👑 | `{ status }`, only the next step in the flow (or `Cancelled`) |
+| DELETE | `/admin/order/:id` | 👑 | Returns stock if the order was still active |
 
-Example `POST /order/new` body:
+---
 
-```json
-{
-  "shippingInfo": {
-    "address": "123 Main St", "city": "Lahore", "state": "Punjab",
-    "country": "Pakistan", "pinCode": "54000", "phoneNo": "03001234567"
-  },
-  "orderItems": [{ "product": "<productId>", "quantity": 2 }],
-  "paymentInfo": { "id": "pi_123", "status": "succeeded" }
-}
-```
-
-- If `orderItems` is omitted, the order is created from the user's cart and the cart is emptied.
-- Name and price come from the database, so the client can't set its own prices. `itemsPrice + 18% tax + shipping` (200, or free at 1000 or more) = `totalPrice`.
-- Stock is reserved atomically when the order is placed and returned when an order is cancelled (or deleted while still active).
-
-**Status flow:** `Processing → Shipped → Delivered`. `Processing` and `Shipped` orders can also move to `Cancelled`. `Delivered` sets `deliveredAt`.
-
-## Error format
-
-Every error returns a consistent shape:
-
-```json
-{ "success": false, "message": "Product not found" }
-```
+Started from my ecommerce-backend project (auth, products, cart and orders), extended into Raashan for the DevWeekends MERN project.

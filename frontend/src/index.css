@@ -1,0 +1,250 @@
+@import "tailwindcss";
+@import "@fontsource-variable/anybody/standard.css";
+@import "@fontsource-variable/figtree";
+@import "@fontsource/kalam/latin-400.css";
+@import "@fontsource/kalam/latin-700.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+/* Raashan is a grocery parchi: ballpoint ink on paper, a ledger margin, haldi for prices */
+@theme {
+    --color-page: #EDEFE8;
+    --color-paper: #FFFEF8;
+    --color-ink: #2433A6;
+    --color-ink-dark: #1A2580;
+    --color-ink-soft: #DDE1F6;
+    --color-haldi: #E2A817;
+    --color-haldi-soft: #FBEFC9;
+    /* Haldi dark enough to read as text on white */
+    --color-haldi-ink: #7A5A00;
+    --color-margin: #D2453B;
+    --color-margin-soft: #F8DEDB;
+    --color-text: #1C1F1A;
+    --color-muted: #646A60;
+    --color-line: #D3D8CC;
+    --color-rule: #C9D3EE;
+    --color-leaf: #2F7A3E;
+    --color-leaf-soft: #DCEEDD;
+
+    --font-display: "Anybody Variable", "Arial Narrow", sans-serif;
+    --font-sans: "Figtree Variable", system-ui, sans-serif;
+    --font-hand: "Kalam", "Comic Sans MS", cursive;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        background: var(--color-page);
+        color: var(--color-text);
+        font-family: var(--font-sans);
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    h1, h2, h3 {
+        font-family: var(--font-display);
+        font-stretch: 112%;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        line-height: 1.05;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-ink);
+        outline-offset: 2px;
+    }
+
+    ::selection {
+        background: var(--color-haldi-soft);
+    }
+}
+
+@layer components {
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        border-radius: 999px;
+        padding: 0.55rem 1.1rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background-color 150ms, color 150ms, border-color 150ms, transform 150ms;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-primary {
+        background: var(--color-ink);
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: var(--color-ink-dark);
+    }
+
+    .btn-outline {
+        border: 1.5px solid var(--color-ink);
+        color: var(--color-ink);
+        background: transparent;
+    }
+
+    .btn-outline:hover:not(:disabled) {
+        background: var(--color-ink-soft);
+    }
+
+    .btn-ghost {
+        color: var(--color-muted);
+        padding-inline: 0.6rem;
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+        color: var(--color-text);
+        background: rgb(0 0 0 / 0.05);
+    }
+
+    .btn-danger {
+        border: 1.5px solid var(--color-margin);
+        color: var(--color-margin);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background: var(--color-margin-soft);
+    }
+
+    .btn-sm {
+        padding: 0.3rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .input {
+        width: 100%;
+        border: 1.5px solid var(--color-line);
+        background: white;
+        border-radius: 10px;
+        padding: 0.55rem 0.75rem;
+        font-size: 0.95rem;
+        transition: border-color 150ms;
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--color-ink);
+    }
+
+    .label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        margin-bottom: 0.3rem;
+    }
+
+    .card {
+        background: white;
+        border: 1px solid var(--color-line);
+        border-radius: 16px;
+    }
+
+    .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+    }
+
+    .price {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+    }
+
+    /* The signature: lined paper with a red ledger margin */
+    .parchi {
+        position: relative;
+        background-color: var(--color-paper);
+        border-radius: 4px;
+        box-shadow: 0 1px 0 var(--color-line), 0 14px 30px -18px rgb(28 31 26 / 0.35);
+    }
+
+    .parchi::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 2.75rem;
+        width: 1.5px;
+        background: var(--color-margin);
+        opacity: 0.55;
+    }
+
+    /* Each row draws its own ruled line, so lines stay aligned when a row wraps on a phone */
+    .parchi-row {
+        min-height: 48px;
+        border-bottom: 1px solid var(--color-rule);
+    }
+
+    .handwriting {
+        font-family: var(--font-hand);
+        color: var(--color-ink);
+    }
+
+    /* Receipt-style dotted leader between what was written and what was matched */
+    .leader {
+        flex: 1;
+        min-width: 1rem;
+        border-bottom: 2px dotted var(--color-line);
+        transform: translateY(-0.3rem);
+    }
+
+    /* Horizontally scrolling chip rows: swipe or shift+wheel, no visible bar */
+    .no-scrollbar {
+        scrollbar-width: none;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .whatsapp-bubble {
+        background: #D9FDD3;
+        border-radius: 10px 10px 10px 2px;
+        box-shadow: 0 1px 1px rgb(0 0 0 / 0.08);
+    }
+}
+
+@keyframes write-in {
+    from {
+        opacity: 0;
+        transform: translateX(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.animate-write-in {
+    animation: write-in 260ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

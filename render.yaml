@@ -1,0 +1,27 @@
+# Render Blueprint: one web service runs the Express API and serves the React build.
+# New > Blueprint on render.com, pick this repo, then fill in DB_URI and CLIENT_URL when asked.
+services:
+  - type: web
+    name: raashan
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      # MongoDB Atlas connection string
+      - key: DB_URI
+        sync: false
+      # The site's own URL, e.g. https://raashan.onrender.com (used in password reset emails)
+      - key: CLIENT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 5d
+      - key: COOKIE_EXPIRE
+        value: "7"
