@@ -4,7 +4,7 @@ A MERN grocery delivery app built around how Pakistani families actually shop: s
 
 Built with **MongoDB, Express 5, React 19 + Redux Toolkit, Node.js**.
 
-**Live:** _add your Render URL here_ · **Repo:** _add your GitHub URL here_
+**Live:** _add your Render URL here_ · **Repo:** https://github.com/mtalha1012/raashan
 
 ## Features
 
