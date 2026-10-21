@@ -4,16 +4,11 @@ const ErrorHandler = require("../utils/errorHandler")
 const sendToken = require("../utils/jwtToken")
 const sendEmail = require("../utils/sendEmail")
 const crypto = require("crypto")
+const { removeFromHousehold } = require("./householdController")
 
 exports.registerUser = asyncError(async (req, res, next) => {
-    const {name, email, password} = req.body
-    const user = await User.create({
-        name, email, password,
-        avatar: {
-            publicId: "publicId",
-            url: "url"
-        }
-    })
+    const {name, email, password, phone} = req.body
+    const user = await User.create({ name, email, password, phone })
 
     sendToken(user, 201, res)
 })
@@ -45,6 +40,8 @@ exports.logout = asyncError(async (req, res, next) => {
     res.cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
     })
     
     res.status(200).json({
@@ -67,14 +64,16 @@ exports.forgotPassword = asyncError(async (req, res, next) => {
         validateBeforeSave: false
     })
 
-    const resetPasswordUrl = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`
+    // The link opens the frontend's reset page, which calls PUT /api/v1/password/reset/:token
+    const clientUrl = process.env.CLIENT_URL || `${req.protocol}://${req.get("host")}`
+    const resetPasswordUrl = `${clientUrl}/password/reset/${resetToken}`
     const message = `Your password reset token is \n\n ${resetPasswordUrl} \n\n If you have not requested this email, 
     then please ignore it`
 
     try {
         await sendEmail({
             email:user.email,
-            subject: `Ecommerce password recovery`,
+            subject: `Raashan password recovery`,
             message
         })
 
@@ -151,11 +150,12 @@ exports.updatePassword = asyncError(async (req, res, next) => {
     sendToken(user, 200, res)
 })
 
-// Update logged in user's name / email
+// Update logged in user's name / email / phone
 exports.updateProfile = asyncError(async (req, res, next) => {
     const newUserData = {}
     if (req.body.name) newUserData.name = req.body.name
     if (req.body.email) newUserData.email = req.body.email
+    if (req.body.phone !== undefined) newUserData.phone = req.body.phone
 
     const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
         returnDocument: "after",
@@ -215,7 +215,7 @@ exports.updateUserRole = asyncError(async (req, res, next) => {
     })
 })
 
-// Delete user -- Admin
+// Delete user -- Admin (they also leave their household)
 exports.deleteUser = asyncError(async (req, res, next) => {
     const user = await User.findById(req.params.id)
 
@@ -223,6 +223,11 @@ exports.deleteUser = asyncError(async (req, res, next) => {
         return next(new ErrorHandler(`User does not exist with id: ${req.params.id}`, 404))
     }
 
+    if (user.id === req.user.id) {
+        return next(new ErrorHandler("You cannot delete your own account here", 400))
+    }
+
+    await removeFromHousehold(user)
     await user.deleteOne()
 
     res.status(200).json({

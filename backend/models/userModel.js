@@ -8,9 +8,10 @@ const userSchema = new mongoose.Schema({
     name:{
         type: String,
         required: [true, "Please enter your name"],
+        trim: true,
         maxLength: [30, "Name cannot be more than 30 characters"],
-        minLength: [4, "Name should have at least 4 characters"]
-    }, 
+        minLength: [2, "Name should have at least 2 characters"]
+    },
     email: {
         type: String,
         unique: true,
@@ -18,28 +19,28 @@ const userSchema = new mongoose.Schema({
         trim: true,
         required: [true, "Please enter your email"],
         validate: [validator.isEmail, "Please enter correct email"]
-    }, 
+    },
     password: {
         minLength: [8, "Password should have at least 8 characters"],
         type:String,
         required: [true, "Please enter your password"],
         select: false
     },
-    avatar: {
-        publicId:{
-            type:String,
-            required:true
-        },
-        url:{
-            type:String,
-            required:true
-        }
-    }, 
+    phone: {
+        type: String,
+        trim: true,
+    },
     role: {
         type: String,
         enum: ["user", "admin"],
         default: "user"
-    }, 
+    },
+    // A user belongs to at most one household at a time
+    household: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Household",
+        default: null
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     createdAt: {
@@ -53,10 +54,10 @@ userSchema.pre("save", async function() {
     this.password = await bcrypt.hash(this.password, 10)
 })
 
-// JWT Token 
+// JWT Token
 userSchema.methods.getJWTToken = function() {
     return jwt.sign({
-        id: this.id,  
+        id: this.id,
     }, process.env.JWT_SECRET,{
         expiresIn: process.env.JWT_EXPIRE,
     })

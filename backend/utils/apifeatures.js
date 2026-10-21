@@ -5,14 +5,15 @@ class ApiFeatures {
     }
 
     search() {
-        const keyword = this.queryStr.keyword ? {
-            name: {
-                // Escape regex special characters so the keyword is matched literally
-                $regex:String(this.queryStr.keyword).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-                $options: "i"
-            }
-        } : {}
-        
+        // Escape regex special characters so the keyword is matched literally
+        const pattern = this.queryStr.keyword ? {
+            $regex:String(this.queryStr.keyword).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+            $options: "i"
+        } : null
+
+        // Match the product name or any alias, so "doodh" finds Milk
+        const keyword = pattern ? { $or: [{ name: pattern }, { aliases: pattern }] } : {}
+
         this.query = this.query.find({...keyword})
         return this
     }

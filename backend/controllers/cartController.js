@@ -2,16 +2,22 @@ const Cart = require("../models/cartModel")
 const Product = require("../models/productModel")
 const ErrorHandler = require("../utils/errorHandler")
 const asyncError = require("../middleware/asyncError")
+const { DELIVERY_FEE, FREE_DELIVERY_THRESHOLD } = require("../utils/pricing")
 
 // Populate product info and compute totals from current product prices
 const sendCart = async (cart, statusCode, res) => {
-    await cart.populate("items.product", "name price stock images")
+    await cart.populate({
+        path: "items.product",
+        select: "name price stock image unit category",
+        populate: { path: "category", select: "icon" },
+    })
 
     // Skip items whose product has since been deleted
     const items = cart.items.filter((item) => item.product)
 
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
     const totalPrice = items.reduce((sum, item) => sum + item.quantity * item.product.price, 0)
+    const deliveryFee = totalPrice === 0 || totalPrice >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE
 
     res.status(statusCode).json({
         success: true,
@@ -21,6 +27,8 @@ const sendCart = async (cart, statusCode, res) => {
             items,
             totalItems,
             totalPrice,
+            deliveryFee,
+            freeDeliveryThreshold: FREE_DELIVERY_THRESHOLD,
             updatedAt: cart.updatedAt,
         }
     })

@@ -10,4 +10,7 @@ router.route("/products/:id").put(isAuthenticatedUser, authorizedRoles("admin"),
 .delete(isAuthenticatedUser, authorizedRoles("admin"),  productController.deleteProduct)
 .get(productController.getProductDetails)
 
+router.route("/admin/products")
+.get(isAuthenticatedUser, authorizedRoles("admin"), productController.getAdminProducts)
+
 module.exports = router

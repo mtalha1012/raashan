@@ -1,15 +1,22 @@
 {
-  "name": "ecommerce-backend",
+  "name": "raashan",
   "version": "1.0.0",
-  "description": "Node.js + Express + MongoDB e-commerce backend: auth, products, cart and orders",
+  "description": "Raashan: MERN grocery delivery where the family WhatsApp list becomes one shared household list",
   "license": "ISC",
-  "author": "",
+  "author": "Muhammad Talha",
   "type": "commonjs",
   "main": "backend/server.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "make-admin": "node backend/scripts/makeAdmin.js"
+    "client": "npm run dev --prefix frontend",
+    "build": "npm install --prefix frontend --include=dev && npm run build --prefix frontend",
+    "seed": "node backend/scripts/seed.js",
+    "make-admin": "node backend/scripts/makeAdmin.js",
+    "test": "node --test \"backend/tests/*.test.js\""
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

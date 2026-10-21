@@ -1,17 +1,19 @@
 const Order = require("../models/orderModel")
 const Product = require("../models/productModel")
 const Cart = require("../models/cartModel")
+const Address = require("../models/addressModel")
+const DeliverySlot = require("../models/deliverySlotModel")
 const ErrorHandler = require("../utils/errorHandler")
 const asyncError = require("../middleware/asyncError")
-
-const TAX_RATE = 0.18
-const SHIPPING_FEE = 200
-const FREE_SHIPPING_THRESHOLD = 1000
+const { bookedCounts } = require("./slotController")
+const { isBookableDate, isSlotOpen, bookableDates } = require("../utils/deliveryDates")
+const { DELIVERY_FEE, FREE_DELIVERY_THRESHOLD } = require("../utils/pricing")
 
 // Allowed orderStatus transitions for admins
 const STATUS_TRANSITIONS = {
-    Processing: ["Shipped", "Cancelled"],
-    Shipped: ["Delivered", "Cancelled"],
+    Placed: ["Packed", "Cancelled"],
+    Packed: ["Out for Delivery", "Cancelled"],
+    "Out for Delivery": ["Delivered", "Cancelled"],
     Delivered: [],
     Cancelled: [],
 }
@@ -28,10 +30,27 @@ const restoreStock = async (orderItems) => {
 // Create new order from the request's orderItems, or from the user's cart if none are given.
 // Prices are always taken from the database, never from the client.
 exports.newOrder = asyncError(async (req, res, next) => {
-    const { shippingInfo, paymentInfo } = req.body
+    const { addressId, slotId, deliveryDate } = req.body
     let requestedItems = req.body.orderItems
     let fromCart = false
 
+    // Where and when
+    const address = addressId && await Address.findOne({ _id: addressId, user: req.user.id })
+    if (!address) return next(new ErrorHandler("Please choose a delivery address", 400))
+
+    if (!isBookableDate(deliveryDate)) {
+        const dates = bookableDates()
+        return next(new ErrorHandler(`Delivery date must be between ${dates[0]} and ${dates[dates.length - 1]}`, 400))
+    }
+
+    const slot = slotId && await DeliverySlot.findOne({ _id: slotId, isActive: true })
+    if (!slot) return next(new ErrorHandler("Please choose a delivery slot", 400))
+    if (!isSlotOpen(slot, deliveryDate)) return next(new ErrorHandler("That slot is too soon for today, pick a later one", 400))
+
+    const booked = (await bookedCounts(deliveryDate))[slot.id] || 0
+    if (booked >= slot.capacity) return next(new ErrorHandler(`The ${slot.label} slot is full on ${deliveryDate}`, 400))
+
+    // What
     if (!requestedItems || requestedItems.length === 0) {
         const cart = await Cart.findOne({ user: req.user.id })
         if (!cart || cart.items.length === 0) {
@@ -60,8 +79,9 @@ exports.newOrder = asyncError(async (req, res, next) => {
             product: product._id,
             name: product.name,
             price: product.price,
+            unit: product.unit,
             quantity,
-            image: product.images[0]?.url,
+            image: product.image,
         })
     }
 
@@ -81,22 +101,20 @@ exports.newOrder = asyncError(async (req, res, next) => {
     }
 
     const itemsPrice = roundPrice(orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0))
-    const taxPrice = roundPrice(itemsPrice * TAX_RATE)
-    const shippingPrice = itemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
-    const totalPrice = roundPrice(itemsPrice + taxPrice + shippingPrice)
+    const deliveryFee = itemsPrice >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE
+    const totalPrice = roundPrice(itemsPrice + deliveryFee)
 
     let order
     try {
         order = await Order.create({
-            shippingInfo,
+            shippingInfo: { line1: address.line1, area: address.area, city: address.city, phone: address.phone },
+            deliverySlot: { slot: slot._id, label: slot.label, date: deliveryDate },
             orderItems,
-            paymentInfo,
-            paidAt: paymentInfo?.status === "succeeded" ? Date.now() : undefined,
             itemsPrice,
-            taxPrice,
-            shippingPrice,
+            deliveryFee,
             totalPrice,
             user: req.user.id,
+            household: req.user.household || null,
         })
     } catch (error) {
         await restoreStock(reserved)
@@ -113,13 +131,16 @@ exports.newOrder = asyncError(async (req, res, next) => {
     })
 })
 
-// Get single order -- owner or admin
+// Get single order -- owner, their household, or admin
 exports.getSingleOrder = asyncError(async (req, res, next) => {
     const order = await Order.findById(req.params.id).populate("user", "name email")
 
     if (!order) return next(new ErrorHandler("Order not found", 404))
 
-    if (order.user._id.toString() !== req.user.id && req.user.role !== "admin") {
+    const isOwner = order.user._id.toString() === req.user.id
+    const isHousehold = order.household && req.user.household && order.household.toString() === req.user.household.toString()
+
+    if (!isOwner && !isHousehold && req.user.role !== "admin") {
         return next(new ErrorHandler("You are not allowed to view this order", 403))
     }
 
@@ -139,7 +160,7 @@ exports.myOrders = asyncError(async (req, res, next) => {
     })
 })
 
-// Cancel own order -- only while it is still processing
+// Cancel own order -- only before it is packed
 exports.cancelOrder = asyncError(async (req, res, next) => {
     const order = await Order.findById(req.params.id)
 
@@ -149,7 +170,7 @@ exports.cancelOrder = asyncError(async (req, res, next) => {
         return next(new ErrorHandler("You are not allowed to cancel this order", 403))
     }
 
-    if (order.orderStatus !== "Processing") {
+    if (order.orderStatus !== "Placed") {
         return next(new ErrorHandler(`Order is already ${order.orderStatus.toLowerCase()} and cannot be cancelled`, 400))
     }
 
@@ -180,7 +201,7 @@ exports.getAllOrders = asyncError(async (req, res, next) => {
     })
 })
 
-// Update order status -- Admin
+// Update order status -- Admin (cash is collected on delivery, so that marks it paid)
 exports.updateOrder = asyncError(async (req, res, next) => {
     const { status } = req.body
     const order = await Order.findById(req.params.id)
@@ -192,11 +213,16 @@ exports.updateOrder = asyncError(async (req, res, next) => {
     }
 
     order.orderStatus = status
-    if (status === "Delivered") order.deliveredAt = Date.now()
+    if (status === "Delivered") {
+        order.deliveredAt = Date.now()
+        order.paidAt = Date.now()
+    }
 
     await order.save()
 
     if (status === "Cancelled") await restoreStock(order.orderItems)
+
+    await order.populate("user", "name email")
 
     res.status(200).json({
         success: true,
@@ -210,7 +236,7 @@ exports.deleteOrder = asyncError(async (req, res, next) => {
 
     if (!order) return next(new ErrorHandler("Order not found", 404))
 
-    if (["Processing", "Shipped"].includes(order.orderStatus)) {
+    if (["Placed", "Packed", "Out for Delivery"].includes(order.orderStatus)) {
         await restoreStock(order.orderItems)
     }
 

@@ -7,7 +7,7 @@ const productSchema = new mongoose.Schema({
     },
     description:{
         type:String,
-        required:[true, "Please enter description"]
+        default:""
     },
     price:{
         type:Number,
@@ -15,22 +15,27 @@ const productSchema = new mongoose.Schema({
         min:[0, "Price cannot be negative"],
         max:[99999999, "Price cannot exceed 8 digits"]
     },
-    rating: {
-        type:Number,
-        default:0
-    },
-    images:[{
-        publicId:{
-            type:String,
-            required:true
-        },
-        url:{
-            type:String,
-            required:true
-        }
-    }],
-    category:{
+    // What one unit of this product is, e.g. "1 litre", "12 pcs", "10 kg".
+    // The list parser reads the pack size from it, so "anday 12" becomes 1 x "12 pcs"
+    unit:{
         type:String,
+        required:[true, "Please enter product unit"],
+        trim:true
+    },
+    // Other names people type for this product, e.g. "doodh" for Milk
+    aliases:[{
+        type:String,
+        lowercase:true,
+        trim:true
+    }],
+    image:{
+        type:String,
+        trim:true,
+        default:""
+    },
+    category:{
+        type: mongoose.Schema.ObjectId,
+        ref:"Category",
         required:[true, "Please enter category"],
     },
     stock:{
@@ -40,26 +45,6 @@ const productSchema = new mongoose.Schema({
         max:[9999, "Stock cannot exceed 4 digits"],
         default:1
     },
-    numberOfReviews:{
-        type:Number,
-        default:0
-    },
-    reviews:[
-        {
-            name:{
-                type:String,
-                required:true
-            },
-            rating:{
-                type:Number,
-                required:true
-            },
-            comment:{
-                type:String,
-                required:true
-            }
-        }
-    ],
     user:{
         type: mongoose.Schema.ObjectId,
         ref:"User",
